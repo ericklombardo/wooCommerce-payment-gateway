@@ -237,7 +237,7 @@ function fbl_init_gateway_class() {
             wp_enqueue_style('woocommerce_fbl_css'); 
 			
 			wp_register_script('woocommerce_fbl_js_payform', plugin_dir_url( __FILE__ ) . 'assets/js/jquery.payform.min.js', array( 'jquery'), '1.4.0', true );
-			wp_register_script('woocommerce_fbl_js_payment', plugin_dir_url( __FILE__ ) . 'assets/js/payment.js', array('woocommerce_fbl_js_payform' ), '1.0.0', true);
+			wp_register_script('woocommerce_fbl_js_payment', plugin_dir_url( __FILE__ ) . 'assets/js/payment.js', array('woocommerce_fbl_js_payform' ), '1.0.4', true);
 			
 			wp_enqueue_script('woocommerce_fbl_js_payform');
 			wp_enqueue_script('woocommerce_fbl_js_payment');
@@ -341,8 +341,7 @@ function fbl_init_gateway_class() {
 			));			
 			
 			if ( is_wp_error( $response ) ) {
-				$error_message = $response->get_error_message();
-				wc_add_notice("Connection error {$error_message}", 'error' );
+				wc_add_notice("Error de conexión al procesar el pago", 'error' );
 				return;
 			} else {				
 				$status = $response['response']['code'];
@@ -358,7 +357,11 @@ function fbl_init_gateway_class() {
 					);
 				}
 				else{
-					wc_add_notice("Connection error status: {$status} message: {$responseMessage}", 'error' );
+					$error_message = "Su transacción no puede ser procesada";
+					if($status == 400 && isset($body->gatewayResponse) && $body->gatewayResponse->errorType === 'warning') {
+						$error_message = $body->gatewayResponse->errorMessage;
+					}
+					wc_add_notice($error_message, 'error' );
 					return;
 				}
 			}			

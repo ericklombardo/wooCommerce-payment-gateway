@@ -45,7 +45,16 @@ jQuery($ => {
 
 	const isStringNullOrWhiteSpace = (val) => 
 		isStringNullOrEmpty(val) || val.replace(/\s/g, "") === '';
-    		
+		
+	const onError = () => {
+		const btn = document.getElementById('place_order');
+        btn.disabled = false;
+		processing = false;
+		$('.woocommerce-error li').each(function(){
+            console.error($(this).text());
+        });		
+	};	
+
     const sendPayment = () => {          
         if(processing){
             return false;
@@ -88,11 +97,11 @@ jQuery($ => {
 		$('#fbl_type').val(cardType);
 		$('#fbl_month').val(expiry.month);
 		$('#fbl_year').val(expiry.year);
-        btn.value = 'Espere un momento...';
-        
+
         $('form.checkout.woocommerce-checkout').submit(); 
     }
 
-    $('form.checkout.woocommerce-checkout').on('checkout_place_order', sendPayment);
+	$('form.checkout.woocommerce-checkout').on('checkout_place_order', sendPayment);
+	$(document.body).on('checkout_error', onError);
 	
 });
